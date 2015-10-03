@@ -35,4 +35,4 @@
         android:targetClass="com.qualcomm.ftccommon.configuration.AutoConfigureActivity" />
     </PreferenceScreen>
   </PreferenceCategory>
-</PreferenceScreen><!-- From: file:/home/hallmw/Projects/ftc_app/FtcRobotController/src/main/res/xml/preferences.xml -->
+</PreferenceScreen><!-- From: file:/home/hallmw/Projects/FTC/FtcRobotController/src/main/res/xml/preferences.xml -->
