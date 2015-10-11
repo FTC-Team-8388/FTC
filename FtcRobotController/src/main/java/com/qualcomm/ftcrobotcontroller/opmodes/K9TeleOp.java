@@ -75,6 +75,10 @@ public class K9TeleOp extends Robot {
 	DcMotor motorRight;
 	DcMotor motorLeft;
 	protected DcMotorController controller;
+
+	float leftMotorPower;
+	float rightMotorPower;
+
 	//Servo claw;
 	//Servo arm;
 
@@ -124,16 +128,22 @@ public class K9TeleOp extends Robot {
 		 *    "servo_1" controls the arm joint of the manipulator.
 		 *    "servo_6" controls the claw joint of the manipulator.
 		 */
+
+		// Create our tasks an events lists
 		tasks = new ConcurrentLinkedQueue<GamepadTask>();
 		events = new ConcurrentLinkedQueue<GamepadTask.GamepadEvent>();
 
+		//Get our motors from the hardware map
 		motorRight = hardwareMap.dcMotor.get("Right_Motor");
 		motorLeft = hardwareMap.dcMotor.get("Left_Motor");
+
+		//Revers Direction on left motor
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
+
+		//Create our task and add to tasks list.
 		GamepadTask task = new GamepadTask(this);//,this.gamepad1);
 		addTask(task);
-		//tasks.add(task);
-		//task.start();
+
 		//arm = hardwareMap.servo.get("servo_1");
 		//claw = hardwareMap.servo.get("servo_6");
 
@@ -142,6 +152,7 @@ public class K9TeleOp extends Robot {
 		//clawPosition = 0.2;
 	}
 
+	//This function takes action based on the EventKind
 	@Override
 	public void handleEvent(RobotEvent e) {
 		GamepadTask.GamepadEvent event = (GamepadTask.GamepadEvent) e;
@@ -164,44 +175,31 @@ public class K9TeleOp extends Robot {
 			case BUTTON_Y_UP:
 				break;
 			case LEFT_STICK_Y:
-				float power = gamepad1.left_stick_y;
-				//float direction = gamepad1.left_stick_x;
-				//float right = throttle - direction;
-				//float left = throttle + direction;
+				leftMotorPower = gamepad1.left_stick_y;
 
 				// clip the right/left values so that the values never exceed +/- 1
-				//float right = Range.clip(power, -1, 1);
-				float left = Range.clip(power, -1, 1);
+				leftMotorPower = Range.clip(leftMotorPower, -1, 1);
 
 				// scale the joystick value to make it easier to control
-				// the robot more precisely at slower speeds.
-				//right = (float)scaleInput(right);
-				left =  (float)scaleInput(left);
+				// the robot more precisely at slower speeds
+				leftMotorPower =  (float)scaleInput(leftMotorPower);
 
 				// write the values to the motors
-				motorLeft.setPower(left);
-				//motorLeft.setPower(left);
-				//motorRight.setPower(0.2);
+				motorLeft.setPower(leftMotorPower);
 				break;
 			case RIGHT_STICK_Y:
-				power = gamepad1.right_stick_y;
-				//float direction = gamepad1.left_stick_x;
-				//float right = throttle - direction;
-				//float left = throttle + direction;
+				rightMotorPower = gamepad1.right_stick_y;
 
 				// clip the right/left values so that the values never exceed +/- 1
-				float right = Range.clip(power, -1, 1);
-				//left = Range.clip(left, -1, 1);
+				float right = Range.clip(rightMotorPower, -1, 1);
 
 				// scale the joystick value to make it easier to control
 				// the robot more precisely at slower speeds.
-				right = (float)scaleInput(right);
+				rightMotorPower = (float)scaleInput(rightMotorPower);
 				//left =  (float)scaleInput(left);
 
 				// write the values to the motors
-				motorRight.setPower(right);
-				//motorLeft.setPower(left);
-				//motorRight.setPower(0.2);
+				motorRight.setPower(rightMotorPower);
 				break;
 		}
 	}
