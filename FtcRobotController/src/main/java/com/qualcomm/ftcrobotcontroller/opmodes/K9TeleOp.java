@@ -34,6 +34,10 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 import com.qualcomm.robotcore.hardware.DcMotor;
 //import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.ftcrobotcontroller.opmodes.GamepadTask;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.util.Range;
+
+import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * TeleOp Mode
@@ -41,7 +45,10 @@ import com.qualcomm.ftcrobotcontroller.opmodes.GamepadTask;
  * Enables control of the robot via the gamepad
  */
 public class K9TeleOp extends Robot {
-	
+
+	public ConcurrentLinkedQueue<GamepadTask> tasks;
+	public ConcurrentLinkedQueue<GamepadTask.GamepadEvent> events;
+
 	/*
 	 * Note: the configuration of the servos is such that
 	 * as the arm servo approaches 0, the arm position moves up (away from the floor).
@@ -67,6 +74,7 @@ public class K9TeleOp extends Robot {
 
 	DcMotor motorRight;
 	DcMotor motorLeft;
+	protected DcMotorController controller;
 	//Servo claw;
 	//Servo arm;
 
@@ -75,13 +83,27 @@ public class K9TeleOp extends Robot {
 	 */
 	public K9TeleOp() {
 
+
+	}
+
+	@Override
+	protected void addTask(RobotTask task) {
+
+		tasks.add((GamepadTask) task);
+		task.start();
+	}
+
+	@Override
+	public void queueEvent(RobotEvent event) {
+
+		events.add((GamepadTask.GamepadEvent) event);
 	}
 
 	/*
-	 * Code to run when the op mode is initialized goes here
-	 * 
-	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#init()
-	 */
+         * Code to run when the op mode is initialized goes here
+         *
+         * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#init()
+         */
 	@Override
 	public void init() {
 
@@ -102,10 +124,16 @@ public class K9TeleOp extends Robot {
 		 *    "servo_1" controls the arm joint of the manipulator.
 		 *    "servo_6" controls the claw joint of the manipulator.
 		 */
+		tasks = new ConcurrentLinkedQueue<GamepadTask>();
+		events = new ConcurrentLinkedQueue<GamepadTask.GamepadEvent>();
+
 		motorRight = hardwareMap.dcMotor.get("Right_Motor");
 		motorLeft = hardwareMap.dcMotor.get("Left_Motor");
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
-		
+		GamepadTask task = new GamepadTask(this);//,this.gamepad1);
+		addTask(task);
+		//tasks.add(task);
+		//task.start();
 		//arm = hardwareMap.servo.get("servo_1");
 		//claw = hardwareMap.servo.get("servo_6");
 
@@ -120,11 +148,12 @@ public class K9TeleOp extends Robot {
 
 		switch (event.kind) {
 			case BUTTON_A_UP:
-				motorRight.setPower(.5);
+				motorRight.setPower(1.0);
 				break;
 			case BUTTON_B_DOWN:
 				break;
 			case BUTTON_B_UP:
+				motorRight.setPower(0.0);
 				break;
 			case BUTTON_X_DOWN:
 				break;
@@ -133,6 +162,46 @@ public class K9TeleOp extends Robot {
 			case BUTTON_Y_DOWN:
 				break;
 			case BUTTON_Y_UP:
+				break;
+			case LEFT_STICK_Y:
+				float power = gamepad1.left_stick_y;
+				//float direction = gamepad1.left_stick_x;
+				//float right = throttle - direction;
+				//float left = throttle + direction;
+
+				// clip the right/left values so that the values never exceed +/- 1
+				//float right = Range.clip(power, -1, 1);
+				float left = Range.clip(power, -1, 1);
+
+				// scale the joystick value to make it easier to control
+				// the robot more precisely at slower speeds.
+				//right = (float)scaleInput(right);
+				left =  (float)scaleInput(left);
+
+				// write the values to the motors
+				motorLeft.setPower(left);
+				//motorLeft.setPower(left);
+				//motorRight.setPower(0.2);
+				break;
+			case RIGHT_STICK_Y:
+				power = gamepad1.right_stick_y;
+				//float direction = gamepad1.left_stick_x;
+				//float right = throttle - direction;
+				//float left = throttle + direction;
+
+				// clip the right/left values so that the values never exceed +/- 1
+				float right = Range.clip(power, -1, 1);
+				//left = Range.clip(left, -1, 1);
+
+				// scale the joystick value to make it easier to control
+				// the robot more precisely at slower speeds.
+				right = (float)scaleInput(right);
+				//left =  (float)scaleInput(left);
+
+				// write the values to the motors
+				motorRight.setPower(right);
+				//motorLeft.setPower(left);
+				//motorRight.setPower(0.2);
 				break;
 		}
 	}
@@ -145,8 +214,9 @@ public class K9TeleOp extends Robot {
 	@Override
 	public void loop() {
 
-		RobotEvent e;
-
+		GamepadTask.GamepadEvent e;
+		//RobotEvent e;
+		//motorLeft.setPower(.1);
         /*
          * This is a straight FIFO queue.  Pull an event off the queue, process it,
          * move on to the next one.
@@ -162,7 +232,8 @@ public class K9TeleOp extends Robot {
          * until it tells the Robot that it is finished (true: I'm done, false: I have
          * more work to do), at which point it is stopped.
          */
-		for (RobotTask t : tasks) {
+		for (GamepadTask t : tasks) {
+			//if(gamepad1!=null) motorLeft.setPower(.1);
 			if (t.timeslice()) {
 				t.stop();
 			}
@@ -235,7 +306,9 @@ public class K9TeleOp extends Robot {
 		 * are currently write only.
 		 */
         //telemetry.addData("Text", "*** Robot Data***");
-        //telemetry.addData("arm", "arm:  " + String.format("%.2f", armPosition));
+		//controller.setMotorControllerDeviceMode(DcMotorController.DeviceMode.READ_ONLY);
+        //telemetry.addData("Motor_Right", "Power:  " + String.format("%.2f", motorRight.getPower()));
+		//controller.setMotorControllerDeviceMode(DcMotorController.DeviceMode.WRITE_ONLY);
         //telemetry.addData("claw", "claw:  " + String.format("%.2f", clawPosition));
         //telemetry.addData("left tgt pwr",  "left  pwr: " + String.format("%.2f", left));
         //telemetry.addData("right tgt pwr", "right pwr: " + String.format("%.2f", right));
