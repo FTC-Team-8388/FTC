@@ -134,8 +134,8 @@ public class K9TeleOp extends Robot {
 		events = new ConcurrentLinkedQueue<GamepadTask.GamepadEvent>();
 
 		//Get our motors from the hardware map
-		motorRight = hardwareMap.dcMotor.get("Right_Motor");
-		motorLeft = hardwareMap.dcMotor.get("Left_Motor");
+		motorRight = hardwareMap.dcMotor.get("RightMotor");
+		motorLeft = hardwareMap.dcMotor.get("LeftMotor");
 
 		//Revers Direction on left motor
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
