@@ -74,10 +74,12 @@ public class K9TeleOp extends Robot {
 
 	DcMotor motorRight;
 	DcMotor motorLeft;
+	DcMotor motorArm;
 	protected DcMotorController controller;
 
 	float leftMotorPower;
 	float rightMotorPower;
+
 
 	//Servo claw;
 	//Servo arm;
@@ -136,13 +138,18 @@ public class K9TeleOp extends Robot {
 		//Get our motors from the hardware map
 		motorRight = hardwareMap.dcMotor.get("RightMotor");
 		motorLeft = hardwareMap.dcMotor.get("LeftMotor");
+		motorArm = hardwareMap.dcMotor.get("ArmMotor");
 
 		//Revers Direction on left motor
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
 
-		//Create our task and add to tasks list.
-		GamepadTask task = new GamepadTask(this);//,this.gamepad1);
+		//Create our task and add to tasks list for gamepad 1.
+		GamepadTask task = new GamepadTask(this, GamepadTask.GamepadNumber.GAMEPAD1);
 		addTask(task);
+
+		//Create our task and add to tasks list for gamepad 2.
+		GamepadTask task2 = new GamepadTask(this, GamepadTask.GamepadNumber.GAMEPAD2);
+		addTask(task2);
 
 		//arm = hardwareMap.servo.get("servo_1");
 		//claw = hardwareMap.servo.get("servo_6");
@@ -157,50 +164,77 @@ public class K9TeleOp extends Robot {
 	public void handleEvent(RobotEvent e) {
 		GamepadTask.GamepadEvent event = (GamepadTask.GamepadEvent) e;
 
-		switch (event.kind) {
-			case BUTTON_A_UP:
-				motorRight.setPower(1.0);
-				break;
-			case BUTTON_B_DOWN:
-				break;
-			case BUTTON_B_UP:
-				motorRight.setPower(0.0);
-				break;
-			case BUTTON_X_DOWN:
-				break;
-			case BUTTON_X_UP:
-				break;
-			case BUTTON_Y_DOWN:
-				break;
-			case BUTTON_Y_UP:
-				break;
-			case LEFT_STICK_Y:
-				leftMotorPower = gamepad1.left_stick_y;
+		if(((GamepadTask)event.task).gamepadNumber == GamepadTask.GamepadNumber.GAMEPAD1) {
 
-				// clip the right/left values so that the values never exceed +/- 1
-				leftMotorPower = Range.clip(leftMotorPower, -1, 1);
+			switch (event.kind) {
+				case BUTTON_A_DOWN:
+					break;
+				case BUTTON_B_DOWN:
+					break;
+				case BUTTON_B_UP:
+					break;
+				case BUTTON_X_DOWN:
+					break;
+				case BUTTON_X_UP:
+					break;
+				case BUTTON_Y_DOWN:
+					break;
+				case BUTTON_Y_UP:
+					break;
+				case LEFT_STICK_Y:
+					leftMotorPower = gamepad1.left_stick_y;
 
-				// scale the joystick value to make it easier to control
-				// the robot more precisely at slower speeds
-				leftMotorPower =  (float)scaleInput(leftMotorPower);
+					// clip the right/left values so that the values never exceed +/- 1
+					leftMotorPower = Range.clip(leftMotorPower, -1, 1);
 
-				// write the values to the motors
-				motorLeft.setPower(leftMotorPower);
-				break;
-			case RIGHT_STICK_Y:
-				rightMotorPower = gamepad1.right_stick_y;
+					// scale the joystick value to make it easier to control
+					// the robot more precisely at slower speeds
+					leftMotorPower = (float) scaleInput(leftMotorPower);
 
-				// clip the right/left values so that the values never exceed +/- 1
-				float right = Range.clip(rightMotorPower, -1, 1);
+					// write the values to the motors
+					motorLeft.setPower(leftMotorPower);
+					break;
+				case RIGHT_STICK_Y:
+					rightMotorPower = gamepad1.right_stick_y;
 
-				// scale the joystick value to make it easier to control
-				// the robot more precisely at slower speeds.
-				rightMotorPower = (float)scaleInput(rightMotorPower);
-				//left =  (float)scaleInput(left);
+					// clip the right/left values so that the values never exceed +/- 1
+					float right = Range.clip(rightMotorPower, -1, 1);
 
-				// write the values to the motors
-				motorRight.setPower(rightMotorPower);
-				break;
+					// scale the joystick value to make it easier to control
+					// the robot more precisely at slower speeds.
+					rightMotorPower = (float) scaleInput(rightMotorPower);
+					//left =  (float)scaleInput(left);
+
+					// write the values to the motors
+					motorRight.setPower(rightMotorPower);
+					break;
+			}
+		}
+		else if(((GamepadTask)event.task).gamepadNumber == GamepadTask.GamepadNumber.GAMEPAD2) {
+			switch (event.kind) {
+				case BUTTON_A_DOWN:
+					motorArm.setPower(0.5);
+					break;
+				case BUTTON_B_DOWN:
+					motorArm.setPower(0.0);
+					break;
+				case BUTTON_B_UP:
+					break;
+				case BUTTON_X_DOWN:
+					break;
+				case BUTTON_X_UP:
+					motorArm.setPower(-0.5);
+					break;
+				case BUTTON_Y_DOWN:
+					break;
+				case BUTTON_Y_UP:
+					break;
+				case LEFT_STICK_Y:
+					break;
+				case RIGHT_STICK_Y:
+					break;
+
+			}
 		}
 	}
 

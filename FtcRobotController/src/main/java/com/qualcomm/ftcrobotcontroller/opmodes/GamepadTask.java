@@ -7,6 +7,11 @@ import com.qualcomm.robotcore.hardware.Gamepad;
 
 public class GamepadTask extends RobotTask {
 
+    public enum  GamepadNumber{
+        GAMEPAD1,
+        GAMEPAD2
+    }
+
     public enum EventKind {
         BUTTON_A_DOWN,
         BUTTON_A_UP,
@@ -51,8 +56,9 @@ public class GamepadTask extends RobotTask {
 
     protected ButtonState buttonState;
     protected JoystickState joystickState;
+    protected GamepadNumber gamepadNumber;
 
-    public GamepadTask(Robot robot)//, Gamepad gamepad)
+    public GamepadTask(Robot robot, GamepadNumber padnumber)
     {
         super(robot);
 
@@ -65,6 +71,8 @@ public class GamepadTask extends RobotTask {
         this.joystickState = new JoystickState();
         this.joystickState.Left_Stick_Y = false;
         this.joystickState.Right_Stick_Y = false;
+
+        this.gamepadNumber = padnumber;
     }
 
     @Override
@@ -97,7 +105,14 @@ public class GamepadTask extends RobotTask {
          *
          * TODO: Choose the right gamepad (pass an enumerated value into the constructor).
          */
-        gamepad = robot.gamepad1;
+
+        if(gamepadNumber == GamepadNumber.GAMEPAD1) {
+            gamepad = robot.gamepad1;
+        }
+        else
+        {
+            gamepad = robot.gamepad2;
+        }
 
         if (gamepad.a) robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_A_DOWN));
  /*       if ((gamepad.a) && (buttonState.a_pressed == false)) {
