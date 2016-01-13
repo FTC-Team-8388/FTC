@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
-//import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.ftcrobotcontroller.opmodes.GamepadTask;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.util.Range;
@@ -75,14 +75,20 @@ public class K9TeleOp extends Robot {
 	DcMotor motorRight;
 	DcMotor motorLeft;
 	DcMotor motorArm;
+
 	protected DcMotorController controller;
 
 	float leftMotorPower;
 	float rightMotorPower;
+	float motorArmPower;
 
 
-	//Servo claw;
-	//Servo arm;
+
+	//Servo motors;
+	Servo lowerRightArm;
+	Servo upperRightArm;
+	Servo lowerLeftArm;
+	Servo upperLeftArm;
 
 	/**
 	 * Constructor
@@ -140,6 +146,12 @@ public class K9TeleOp extends Robot {
 		motorLeft = hardwareMap.dcMotor.get("LeftMotor");
 		motorArm = hardwareMap.dcMotor.get("ArmMotor");
 
+		//Get our servo motors
+		lowerLeftArm = hardwareMap.servo.get("LowerLeftServo");
+		upperLeftArm = hardwareMap.servo.get("UpperLeftServo");
+		lowerRightArm = hardwareMap.servo.get("LowerRightServo");
+		upperRightArm = hardwareMap.servo.get("UpperRightServo");
+
 		//Revers Direction on left motor
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
 
@@ -150,9 +162,6 @@ public class K9TeleOp extends Robot {
 		//Create our task and add to tasks list for gamepad 2.
 		GamepadTask task2 = new GamepadTask(this, GamepadTask.GamepadNumber.GAMEPAD2);
 		addTask(task2);
-
-		//arm = hardwareMap.servo.get("servo_1");
-		//claw = hardwareMap.servo.get("servo_6");
 
 		// assign the starting position of the wrist and claw
 		//armPosition = 0.2;
@@ -213,25 +222,38 @@ public class K9TeleOp extends Robot {
 		else if(((GamepadTask)event.task).gamepadNumber == GamepadTask.GamepadNumber.GAMEPAD2) {
 			switch (event.kind) {
 				case BUTTON_A_DOWN:
-					motorArm.setPower(0.5);
+					lowerLeftArm.setPosition();
 					break;
 				case BUTTON_B_DOWN:
-					motorArm.setPower(0.0);
+					upperLeftArm.setPosition();
 					break;
 				case BUTTON_B_UP:
 					break;
 				case BUTTON_X_DOWN:
+					lowerRightArm.setPosition();
 					break;
 				case BUTTON_X_UP:
-					motorArm.setPower(-0.5);
 					break;
 				case BUTTON_Y_DOWN:
+					upperRightArm.setPosition();
 					break;
 				case BUTTON_Y_UP:
 					break;
 				case LEFT_STICK_Y:
 					break;
 				case RIGHT_STICK_Y:
+					motorArmPower = gamepad2.right_stick_y;
+
+					// clip the right/left values so that the values never exceed +/- 1
+					float right = Range.clip(motorArmPower, -1, 1);
+
+					// scale the joystick value to make it easier to control
+					// the arm more precisely at slower speeds.
+					motorArmPower = (float) scaleInput(motorArmPower);
+
+					// write the values to the motors
+					motorArm.setPower(motorArmPower);
+
 					break;
 
 			}
