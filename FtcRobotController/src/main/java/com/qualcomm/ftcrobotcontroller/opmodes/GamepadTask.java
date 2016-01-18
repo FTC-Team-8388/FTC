@@ -14,13 +14,13 @@ public class GamepadTask extends RobotTask {
 
     public enum EventKind {
         BUTTON_A_DOWN,
-        BUTTON_A_UP,
         BUTTON_B_DOWN,
-        BUTTON_B_UP,
         BUTTON_X_DOWN,
-        BUTTON_X_UP,
         BUTTON_Y_DOWN,
-        BUTTON_Y_UP,
+        BUMPER_LEFT_DOWN,
+        TRIGGER_LEFT_DOWN,
+        BUMPER_RIGHT_DOWN,
+        TRIGGER_RIGHT_DOWN,
         LEFT_STICK_Y,
         RIGHT_STICK_Y
     }
@@ -47,6 +47,10 @@ public class GamepadTask extends RobotTask {
         public boolean b_pressed;
         public boolean x_pressed;
         public boolean y_pressed;
+        public boolean lb_pressed; // left button pressed
+        public boolean lt_pressed; // left trigger pressed
+        public boolean rb_pressed; // right button pressed
+        public boolean rt_pressed; // right trigger pressed
     }
 
     protected class JoystickState{
@@ -67,6 +71,11 @@ public class GamepadTask extends RobotTask {
         this.buttonState.b_pressed = false;
         this.buttonState.x_pressed = false;
         this.buttonState.y_pressed = false;
+        this.buttonState.lb_pressed = false;
+        this.buttonState.lt_pressed = false;
+        this.buttonState.rb_pressed = false;
+        this.buttonState.rt_pressed = false;
+
 
         this.joystickState = new JoystickState();
         this.joystickState.Left_Stick_Y = false;
@@ -114,18 +123,38 @@ public class GamepadTask extends RobotTask {
             gamepad = robot.gamepad2;
         }
 
-        if (gamepad.a) robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_A_DOWN));
- /*       if ((gamepad.a) && (buttonState.a_pressed == false)) {
+            // check the state of all buttons on controller and create event
+        if (gamepad.a)
+        {
             robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_A_DOWN));
-            buttonState.a_pressed = true;
-        } else if ((!gamepad.a) && (buttonState.a_pressed == true)) {
-            robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_A_UP));
-            buttonState.a_pressed = false;
         }
-*/
         if(gamepad.b)
         {
             robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_B_DOWN));
+        }
+        if(gamepad.x)
+        {
+            robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_X_DOWN));
+        }
+        if(gamepad.y)
+        {
+            robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_Y_DOWN));
+        }
+        if(gamepad.left_bumper)
+        {
+            robot.queueEvent(new GamepadEvent(this, EventKind.BUMPER_LEFT_DOWN));
+        }
+        if(gamepad.right_bumper)
+        {
+            robot.queueEvent(new GamepadEvent(this, EventKind.BUMPER_RIGHT_DOWN));
+        }
+        if(gamepad.left_trigger>0.1)
+        {
+            robot.queueEvent(new GamepadEvent(this, EventKind.TRIGGER_LEFT_DOWN));
+        }
+        if(gamepad.right_trigger>0.1)
+        {
+            robot.queueEvent(new GamepadEvent(this, EventKind.TRIGGER_RIGHT_DOWN));
         }
  /*       if ((gamepad.b) && (buttonState.b_pressed == false)) {
             robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_B_DOWN));
@@ -134,7 +163,7 @@ public class GamepadTask extends RobotTask {
             robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_B_UP));
             buttonState.b_pressed = false;
         }*/
-
+/*      // this checks for button up and not pressed conditions
         if ((gamepad.x) && (buttonState.x_pressed == false)) {
             robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_X_DOWN));
             buttonState.x_pressed = true;
@@ -150,7 +179,7 @@ public class GamepadTask extends RobotTask {
             robot.queueEvent(new GamepadEvent(this, EventKind.BUTTON_Y_UP));
             buttonState.y_pressed = false;
         }
-
+*/
         if(gamepad.left_stick_y > 0.0 || gamepad.left_stick_y < 0.0)
         {
             robot.queueEvent(new GamepadEvent(this,EventKind.LEFT_STICK_Y));

@@ -64,7 +64,7 @@ public class K9TeleOp extends Robot {
 	//double armPosition;
 
 	// amount to change the arm servo position.
-	//double armDelta = 0.1;
+	double armDelta = 0.1;
 
 	// position of the claw servo
 	//double clawPosition;
@@ -74,13 +74,18 @@ public class K9TeleOp extends Robot {
 
 	DcMotor motorRight;
 	DcMotor motorLeft;
-	DcMotor motorArm;
+	DcMotor motorSweeper;
+	DcMotor motorRightExtension;
+	DcMotor motorLeftExtension;
 
 	protected DcMotorController controller;
 
 	float leftMotorPower;
 	float rightMotorPower;
-	float motorArmPower;
+	float motorSweeperPower;
+	float rightExtensionPower;
+	float leftExtensionPower;
+	double armPower=0.0;
 
 
 
@@ -89,6 +94,7 @@ public class K9TeleOp extends Robot {
 	Servo upperRightArm;
 	Servo lowerLeftArm;
 	Servo upperLeftArm;
+	Servo peopleArm;
 
 	/**
 	 * Constructor
@@ -144,13 +150,16 @@ public class K9TeleOp extends Robot {
 		//Get our motors from the hardware map
 		motorRight = hardwareMap.dcMotor.get("RightMotor");
 		motorLeft = hardwareMap.dcMotor.get("LeftMotor");
-		motorArm = hardwareMap.dcMotor.get("ArmMotor");
+		motorSweeper = hardwareMap.dcMotor.get("SweeperMotor");
+		motorRightExtension = hardwareMap.dcMotor.get("RightExtensionMotor");
+		motorLeftExtension = hardwareMap.dcMotor.get("LeftExtensionMotor");
 
 		//Get our servo motors
 		lowerLeftArm = hardwareMap.servo.get("LowerLeftServo");
 		upperLeftArm = hardwareMap.servo.get("UpperLeftServo");
 		lowerRightArm = hardwareMap.servo.get("LowerRightServo");
 		upperRightArm = hardwareMap.servo.get("UpperRightServo");
+		peopleArm = hardwareMap.servo.get("PeopleHurlerArm");
 
 		//Revers Direction on left motor
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -172,23 +181,36 @@ public class K9TeleOp extends Robot {
 	@Override
 	public void handleEvent(RobotEvent e) {
 		GamepadTask.GamepadEvent event = (GamepadTask.GamepadEvent) e;
-
+		// Driver controller
+		// drives robot - left stick left motor, right stick right motor
+		// controls -
+		// button down means button pressed
 		if(((GamepadTask)event.task).gamepadNumber == GamepadTask.GamepadNumber.GAMEPAD1) {
 
 			switch (event.kind) {
 				case BUTTON_A_DOWN:
+					motorSweeper.setPower(0.0);
+					motorSweeper.setPower(-1.0);// TURN sweeper on reversed full power
 					break;
 				case BUTTON_B_DOWN:
-					break;
-				case BUTTON_B_UP:
+					motorSweeper.setPower(0.0);// TURN sweeper off
 					break;
 				case BUTTON_X_DOWN:
-					break;
-				case BUTTON_X_UP:
+					motorSweeper.setPower(0.0);// TURN sweeper off
 					break;
 				case BUTTON_Y_DOWN:
+					motorSweeper.setPower(0.0);
+					motorSweeper.setPower(1.0);// TURN sweeper on full power
 					break;
-				case BUTTON_Y_UP:
+				case BUMPER_LEFT_DOWN:
+					break;
+				case BUMPER_RIGHT_DOWN:
+
+					break;
+				case TRIGGER_LEFT_DOWN:
+					break;
+				case TRIGGER_RIGHT_DOWN:
+
 					break;
 				case LEFT_STICK_Y:
 					leftMotorPower = gamepad1.left_stick_y;
@@ -207,7 +229,7 @@ public class K9TeleOp extends Robot {
 					rightMotorPower = gamepad1.right_stick_y;
 
 					// clip the right/left values so that the values never exceed +/- 1
-					float right = Range.clip(rightMotorPower, -1, 1);
+					rightMotorPower = Range.clip(rightMotorPower, -1, 1);
 
 					// scale the joystick value to make it easier to control
 					// the robot more precisely at slower speeds.
@@ -222,39 +244,69 @@ public class K9TeleOp extends Robot {
 		else if(((GamepadTask)event.task).gamepadNumber == GamepadTask.GamepadNumber.GAMEPAD2) {
 			switch (event.kind) {
 				case BUTTON_A_DOWN:
-					lowerLeftArm.setPosition();
+					lowerLeftArm.setPosition(0);
 					break;
 				case BUTTON_B_DOWN:
-					upperLeftArm.setPosition();
+					upperLeftArm.setPosition(0);
 					break;
-				case BUTTON_B_UP:
-					break;
+
 				case BUTTON_X_DOWN:
-					lowerRightArm.setPosition();
+					lowerRightArm.setPosition(.25);
 					break;
-				case BUTTON_X_UP:
-					break;
+
 				case BUTTON_Y_DOWN:
-					upperRightArm.setPosition();
+					upperRightArm.setPosition(0.5);
 					break;
-				case BUTTON_Y_UP:
+				case BUMPER_LEFT_DOWN:
+					//armPower += armDelta;
+					//if(armPower>1.0)
+					//	armPower = 1.0;
+					armPower = 0.0;
+					peopleArm.setPosition(armPower);
+					telemetry.addData("Text", "*** Robot Data***");
+					telemetry.addData("arm", "arm: " + String.format("%.2f", armPower));
+					break;
+				case TRIGGER_LEFT_DOWN:
+					//armPower -= armDelta;
+					//if(armPower<0.0)
+					//	armPower = 0.0;
+					armPower = 0.9;
+					peopleArm.setPosition(armPower);
+					telemetry.addData("Text", "*** Robot Data***");
+					telemetry.addData("arm", "arm: " + String.format("%.2f", armPower));
+					//peopleArm.setPosition(0);
+					break;
+				case BUMPER_RIGHT_DOWN:
+					break;
+				case TRIGGER_RIGHT_DOWN:
 					break;
 				case LEFT_STICK_Y:
-					break;
-				case RIGHT_STICK_Y:
-					motorArmPower = gamepad2.right_stick_y;
+					leftExtensionPower = gamepad2.right_stick_y;
 
 					// clip the right/left values so that the values never exceed +/- 1
-					float right = Range.clip(motorArmPower, -1, 1);
+					leftExtensionPower = Range.clip(leftExtensionPower, -1, 1);
 
 					// scale the joystick value to make it easier to control
 					// the arm more precisely at slower speeds.
-					motorArmPower = (float) scaleInput(motorArmPower);
+					leftExtensionPower = (float) scaleInput(leftExtensionPower);
 
 					// write the values to the motors
-					motorArm.setPower(motorArmPower);
-
+					motorLeftExtension.setPower(leftExtensionPower);
 					break;
+				case RIGHT_STICK_Y:
+					rightExtensionPower = gamepad2.right_stick_y;
+
+					// clip the right/left values so that the values never exceed +/- 1
+					rightExtensionPower = Range.clip(rightExtensionPower, -1, 1);
+
+					// scale the joystick value to make it easier to control
+					// the arm more precisely at slower speeds.
+					rightExtensionPower = (float) scaleInput(rightExtensionPower);
+
+					// write the values to the motors
+					motorRightExtension.setPower(rightExtensionPower);
+
+				break;
 
 			}
 		}
