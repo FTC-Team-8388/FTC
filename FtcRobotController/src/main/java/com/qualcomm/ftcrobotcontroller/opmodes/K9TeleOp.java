@@ -281,7 +281,7 @@ public class K9TeleOp extends Robot {
 				case TRIGGER_RIGHT_DOWN:
 					break;
 				case LEFT_STICK_Y:
-					leftExtensionPower = gamepad2.right_stick_y;
+					leftExtensionPower = gamepad2.left_stick_y;
 
 					// clip the right/left values so that the values never exceed +/- 1
 					leftExtensionPower = Range.clip(leftExtensionPower, -1, 1);
