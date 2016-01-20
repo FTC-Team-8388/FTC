@@ -148,12 +148,14 @@ public class GamepadTask extends RobotTask {
         {
             robot.queueEvent(new GamepadEvent(this, EventKind.BUMPER_RIGHT_DOWN));
         }
-        if(gamepad.left_trigger>0.1)
+        if(gamepad.left_trigger>0)
         {
+           // telemetry.addData("LT", "LT: " + String.format("%.2f", gamepad.left_trigger));
             robot.queueEvent(new GamepadEvent(this, EventKind.TRIGGER_LEFT_DOWN));
         }
-        if(gamepad.right_trigger>0.1)
+        if(gamepad.right_trigger>0)
         {
+           // telemetry.addData("RT", "RT: " + String.format("%.2f", gamepad.right_trigger));
             robot.queueEvent(new GamepadEvent(this, EventKind.TRIGGER_RIGHT_DOWN));
         }
  /*       if ((gamepad.b) && (buttonState.b_pressed == false)) {

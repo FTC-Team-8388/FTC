@@ -33,7 +33,7 @@ package com.qualcomm.ftcrobotcontroller.opmodes;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.ftcrobotcontroller.opmodes.GamepadTask;
+//import com.qualcomm.ftcrobotcontroller.opmodes.GamepadTask;
 import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.util.Range;
 
@@ -64,7 +64,7 @@ public class K9TeleOp extends Robot {
 	//double armPosition;
 
 	// amount to change the arm servo position.
-	double armDelta = 0.1;
+	//double armDelta = 0.1;
 
 	// position of the claw servo
 	//double clawPosition;
@@ -82,7 +82,7 @@ public class K9TeleOp extends Robot {
 
 	float leftMotorPower;
 	float rightMotorPower;
-	float motorSweeperPower;
+	//float motorSweeperPower;
 	float rightExtensionPower;
 	float leftExtensionPower;
 	double armPower=0.0;
@@ -95,6 +95,7 @@ public class K9TeleOp extends Robot {
 	Servo lowerLeftArm;
 	Servo upperLeftArm;
 	Servo peopleArm;
+	Servo boxServo;
 
 	/**
 	 * Constructor
@@ -160,6 +161,7 @@ public class K9TeleOp extends Robot {
 		lowerRightArm = hardwareMap.servo.get("LowerRightServo");
 		upperRightArm = hardwareMap.servo.get("UpperRightServo");
 		peopleArm = hardwareMap.servo.get("PeopleHurlerArm");
+		boxServo = hardwareMap.servo.get("BoxServo");
 
 		//Revers Direction on left motor
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -202,12 +204,14 @@ public class K9TeleOp extends Robot {
 					motorSweeper.setPower(0.0);
 					motorSweeper.setPower(1.0);// TURN sweeper on full power
 					break;
-				case BUMPER_LEFT_DOWN:
+				case BUMPER_LEFT_DOWN:     // open box
+					boxServo.setPosition(0.2);
 					break;
 				case BUMPER_RIGHT_DOWN:
 
 					break;
-				case TRIGGER_LEFT_DOWN:
+				case TRIGGER_LEFT_DOWN:   // close box
+					boxServo.setPosition(0.1);
 					break;
 				case TRIGGER_RIGHT_DOWN:
 
@@ -244,24 +248,41 @@ public class K9TeleOp extends Robot {
 		else if(((GamepadTask)event.task).gamepadNumber == GamepadTask.GamepadNumber.GAMEPAD2) {
 			switch (event.kind) {
 				case BUTTON_A_DOWN:
-					lowerLeftArm.setPosition(0);
+					lowerLeftArm.setPosition(.75);		//extended
+
+					/*
+					lowerLeftArm.setPosition(0.0);	// retracted
+					lowerRightArm.setPosition(0.98);   // retracted
+					upperLeftArm.setPosition(0.97);		// retracted
+					upperRightArm.setPosition(0.0);   // retracted
+					*/
+					//wait(500);
+
 					break;
 				case BUTTON_B_DOWN:
-					upperLeftArm.setPosition(0);
+					upperLeftArm.setPosition(0.2);
+/*
+					lowerLeftArm.setPosition(.75);		//extended
+					lowerRightArm.setPosition(0.3);  // extended
+					upperLeftArm.setPosition(0.2);		//extended
+					upperRightArm.setPosition(0.75);	// extended
+					*/
 					break;
 
 				case BUTTON_X_DOWN:
-					lowerRightArm.setPosition(.25);
+					lowerRightArm.setPosition(0.3);  //Extended
+
 					break;
 
 				case BUTTON_Y_DOWN:
-					upperRightArm.setPosition(0.5);
+					upperRightArm.setPosition(0.75);  //Extended
+
 					break;
 				case BUMPER_LEFT_DOWN:
 					//armPower += armDelta;
 					//if(armPower>1.0)
 					//	armPower = 1.0;
-					armPower = 0.0;
+					armPower = 0.95;  // retracted position
 					peopleArm.setPosition(armPower);
 					telemetry.addData("Text", "*** Robot Data***");
 					telemetry.addData("arm", "arm: " + String.format("%.2f", armPower));
@@ -270,13 +291,17 @@ public class K9TeleOp extends Robot {
 					//armPower -= armDelta;
 					//if(armPower<0.0)
 					//	armPower = 0.0;
-					armPower = 0.9;
+					armPower = 0.35;		//launched position
 					peopleArm.setPosition(armPower);
 					telemetry.addData("Text", "*** Robot Data***");
 					telemetry.addData("arm", "arm: " + String.format("%.2f", armPower));
 					//peopleArm.setPosition(0);
 					break;
 				case BUMPER_RIGHT_DOWN:
+					lowerLeftArm.setPosition(0.0);	// retracted
+					lowerRightArm.setPosition(0.95);   // retracted
+					upperLeftArm.setPosition(0.97);		// retracted
+					upperRightArm.setPosition(0.0);   // retracted
 					break;
 				case TRIGGER_RIGHT_DOWN:
 					break;
@@ -448,7 +473,7 @@ public class K9TeleOp extends Robot {
 			index = 16;
 		}
 		
-		double dScale = 0.0;
+		double dScale;
 		if (dVal < 0) {
 			dScale = -scaleArray[index];
 		} else {
