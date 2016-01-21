@@ -143,6 +143,13 @@ public class K9TeleOp extends Robot {
 		 *    "servo_1" controls the arm joint of the manipulator.
 		 *    "servo_6" controls the claw joint of the manipulator.
 		 */
+		/*telemetry.addData("Start Init", "*** Robot Data***");
+		long expectedtime = System.currentTimeMillis();
+		expectedtime += 500;
+		while(System.currentTimeMillis() < expectedtime){
+			//Empty Loop
+		}
+*/
 
 		// Create our tasks an events lists
 		tasks = new ConcurrentLinkedQueue<GamepadTask>();
@@ -166,11 +173,11 @@ public class K9TeleOp extends Robot {
 		// set initial servo values to the closed position
 		// prevents random value assigned on start.
 
+		boxServo.setPosition(0.0);
 		lowerLeftArm.setPosition(0.0);	// retracted
 		lowerRightArm.setPosition(0.95);   // retracted
 		upperLeftArm.setPosition(0.97);		// retracted
 		upperRightArm.setPosition(0.0);   // retracted
-		boxServo.setPosition(0.02);
 		peopleArm.setPosition(0.95);
 
 		//Revers Direction on left motor
@@ -187,6 +194,7 @@ public class K9TeleOp extends Robot {
 		// assign the starting position of the wrist and claw
 		//armPosition = 0.2;
 		//clawPosition = 0.2;
+		//telemetry.addData("End Init", "*** Robot Data***");
 	}
 
 	//This function takes action based on the EventKind
@@ -214,15 +222,16 @@ public class K9TeleOp extends Robot {
 					motorSweeper.setPower(0.0);
 					motorSweeper.setPower(1.0);// TURN sweeper on full power
 					break;
-				case BUMPER_LEFT_DOWN:     // open box
-					boxServo.setPosition(0.2);
+				case BUMPER_LEFT_DOWN:     // open box for load
+					boxServo.setPosition(0.4);
+					break;
+				case TRIGGER_LEFT_DOWN:   // open box discharge
+					boxServo.setPosition(0.85);
 					break;
 				case BUMPER_RIGHT_DOWN:
 
 					break;
-				case TRIGGER_LEFT_DOWN:   // close box
-					boxServo.setPosition(0.1);
-					break;
+
 				case TRIGGER_RIGHT_DOWN:
 
 					break;
