@@ -163,6 +163,16 @@ public class K9TeleOp extends Robot {
 		peopleArm = hardwareMap.servo.get("PeopleHurlerArm");
 		boxServo = hardwareMap.servo.get("BoxServo");
 
+		// set initial servo values to the closed position
+		// prevents random value assigned on start.
+
+		lowerLeftArm.setPosition(0.0);	// retracted
+		lowerRightArm.setPosition(0.95);   // retracted
+		upperLeftArm.setPosition(0.97);		// retracted
+		upperRightArm.setPosition(0.0);   // retracted
+		boxServo.setPosition(0.02);
+		peopleArm.setPosition(0.95);
+
 		//Revers Direction on left motor
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
 
