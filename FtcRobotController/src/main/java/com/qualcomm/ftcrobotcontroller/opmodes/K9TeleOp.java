@@ -49,28 +49,8 @@ public class K9TeleOp extends Robot {
 	public ConcurrentLinkedQueue<GamepadTask> tasks;
 	public ConcurrentLinkedQueue<GamepadTask.GamepadEvent> events;
 
-	/*
-	 * Note: the configuration of the servos is such that
-	 * as the arm servo approaches 0, the arm position moves up (away from the floor).
-	 * Also, as the claw servo approaches 0, the claw opens up (drops the game element).
-	 */
-	// TETRIX VALUES.
-	//final static double ARM_MIN_RANGE  = 0.20;
-	//final static double ARM_MAX_RANGE  = 0.90;
-	//final static double CLAW_MIN_RANGE  = 0.20;
-	//final static double CLAW_MAX_RANGE  = 0.7;
 
-	// position of the arm servo.
-	//double armPosition;
 
-	// amount to change the arm servo position.
-	//double armDelta = 0.1;
-
-	// position of the claw servo
-	//double clawPosition;
-
-	// amount to change the claw servo position by
-	//double clawDelta = 0.1;
 
 	DcMotor motorRight;
 	DcMotor motorLeft;
@@ -85,7 +65,9 @@ public class K9TeleOp extends Robot {
 	//float motorSweeperPower;
 	float rightExtensionPower;
 	float leftExtensionPower;
-	double armPower=0.0;
+	double armPower=0.96;
+	double servoDelta=0.0025;
+	double boxPower=0.0;
 
 
 
@@ -133,23 +115,7 @@ public class K9TeleOp extends Robot {
 		 * configured your robot and created the configuration file.
 		 */
 		
-		/*
-		 * For the demo Tetrix K9 bot we assume the following,
-		 *   There are two motors "motor_1" and "motor_2"
-		 *   "motor_1" is on the right side of the bot.
-		 *   "motor_2" is on the left side of the bot and reversed.
-		 *   
-		 * We also assume that there are two servos "servo_1" and "servo_6"
-		 *    "servo_1" controls the arm joint of the manipulator.
-		 *    "servo_6" controls the claw joint of the manipulator.
-		 */
-		/*telemetry.addData("Start Init", "*** Robot Data***");
-		long expectedtime = System.currentTimeMillis();
-		expectedtime += 500;
-		while(System.currentTimeMillis() < expectedtime){
-			//Empty Loop
-		}
-*/
+
 
 		// Create our tasks an events lists
 		tasks = new ConcurrentLinkedQueue<GamepadTask>();
@@ -173,12 +139,12 @@ public class K9TeleOp extends Robot {
 		// set initial servo values to the closed position
 		// prevents random value assigned on start.
 
-		boxServo.setPosition(0.0);
+		boxServo.setPosition(0.05);
 		lowerLeftArm.setPosition(0.0);	// retracted
 		lowerRightArm.setPosition(0.95);   // retracted
 		upperLeftArm.setPosition(0.97);		// retracted
 		upperRightArm.setPosition(0.0);   // retracted
-		peopleArm.setPosition(0.95);
+		peopleArm.setPosition(0.96);
 
 		//Revers Direction on left motor
 		motorLeft.setDirection(DcMotor.Direction.REVERSE);
@@ -223,13 +189,34 @@ public class K9TeleOp extends Robot {
 					motorSweeper.setPower(1.0);// TURN sweeper on full power
 					break;
 				case BUMPER_LEFT_DOWN:     // open box for load
-					boxServo.setPosition(0.4);
+					if(boxPower < 0.4)
+					{
+						boxPower += servoDelta;
+						if (boxPower > 0.4)
+							boxPower=0.4;
+					}
+					else
+					{
+						boxPower -= servoDelta;
+						if (boxPower < 0.4)
+							boxPower=0.4;
+					}
+					boxServo.setPosition(boxPower);
+					//boxServo.setPosition(0.4);
 					break;
 				case TRIGGER_LEFT_DOWN:   // open box discharge
-					boxServo.setPosition(0.85);
+					boxPower += servoDelta;
+					if (boxPower > 0.9)
+						boxPower=0.9;
+					boxServo.setPosition(boxPower);
+					//boxServo.setPosition(0.85);
 					break;
 				case BUMPER_RIGHT_DOWN:
-
+					boxPower -= servoDelta;
+					if (boxPower <0.05)
+						boxPower=0.05;
+					boxServo.setPosition(boxPower);
+					//boxServo.setPosition(0.07);
 					break;
 
 				case TRIGGER_RIGHT_DOWN:
@@ -266,7 +253,7 @@ public class K9TeleOp extends Robot {
 		}
 		else if(((GamepadTask)event.task).gamepadNumber == GamepadTask.GamepadNumber.GAMEPAD2) {
 			switch (event.kind) {
-				case BUTTON_A_DOWN:
+				case BUTTON_X_DOWN:
 					lowerLeftArm.setPosition(.75);		//extended
 
 					/*
@@ -278,7 +265,7 @@ public class K9TeleOp extends Robot {
 					//wait(500);
 
 					break;
-				case BUTTON_B_DOWN:
+				case BUTTON_Y_DOWN:
 					upperLeftArm.setPosition(0.2);
 /*
 					lowerLeftArm.setPosition(.75);		//extended
@@ -288,29 +275,29 @@ public class K9TeleOp extends Robot {
 					*/
 					break;
 
-				case BUTTON_X_DOWN:
+				case BUTTON_A_DOWN:
 					lowerRightArm.setPosition(0.3);  //Extended
 
 					break;
 
-				case BUTTON_Y_DOWN:
+				case BUTTON_B_DOWN:
 					upperRightArm.setPosition(0.75);  //Extended
 
 					break;
 				case BUMPER_LEFT_DOWN:
-					//armPower += armDelta;
-					//if(armPower>1.0)
-					//	armPower = 1.0;
-					armPower = 0.95;  // retracted position
+					armPower += servoDelta;
+					if(armPower>0.96)
+					armPower = 0.96;
+					//armPower = 0.95;  // retracted position
 					peopleArm.setPosition(armPower);
 					telemetry.addData("Text", "*** Robot Data***");
 					telemetry.addData("arm", "arm: " + String.format("%.2f", armPower));
 					break;
 				case TRIGGER_LEFT_DOWN:
-					//armPower -= armDelta;
-					//if(armPower<0.0)
-					//	armPower = 0.0;
-					armPower = 0.35;		//launched position
+					armPower -= servoDelta;
+					if(armPower<0.35)
+						armPower = 0.35;
+					//armPower = 0.35;		//launched position
 					peopleArm.setPosition(armPower);
 					telemetry.addData("Text", "*** Robot Data***");
 					telemetry.addData("arm", "arm: " + String.format("%.2f", armPower));
@@ -323,6 +310,7 @@ public class K9TeleOp extends Robot {
 					upperRightArm.setPosition(0.0);   // retracted
 					break;
 				case TRIGGER_RIGHT_DOWN:
+					boxServo.setPosition(0.0);
 					break;
 				case LEFT_STICK_Y:
 					leftExtensionPower = gamepad2.left_stick_y;
@@ -388,66 +376,7 @@ public class K9TeleOp extends Robot {
 				t.stop();
 			}
 		}
-		/*
-		 * Gamepad 1
-		 * 
-		 * Gamepad 1 controls the motors via the left stick, and it controls the
-		 * wrist/claw via the a,b, x, y buttons
-		 */
-
-		// throttle: left_stick_y ranges from -1 to 1, where -1 is full up, and
-		// 1 is full down
-		// direction: left_stick_x ranges from -1 to 1, where -1 is full left
-		// and 1 is full right
-		//float throttle = -gamepad1.left_stick_y;
-		//float direction = gamepad1.left_stick_x;
-		//float right = throttle - direction;
-		//float left = throttle + direction;
-
-		// clip the right/left values so that the values never exceed +/- 1
-		//right = Range.clip(right, -1, 1);
-		//left = Range.clip(left, -1, 1);
-
-		// scale the joystick value to make it easier to control
-		// the robot more precisely at slower speeds.
-		//right = (float)scaleInput(right);
-		//left =  (float)scaleInput(left);
 		
-		// write the values to the motors
-		//motorRight.setPower(1.0);
-		//motorLeft.setPower(left);
-
-		// update the position of the arm.
-		//if (gamepad1.a) {
-			// if the A button is pushed on gamepad1, increment the position of
-			// the arm servo.
-		//	armPosition += armDelta;
-		//}
-
-		//if (gamepad1.y) {
-			// if the Y button is pushed on gamepad1, decrease the position of
-			// the arm servo.
-		//	armPosition -= armDelta;
-		//}
-
-		// update the position of the claw
-		//if (gamepad1.x) {
-		//	clawPosition += clawDelta;
-		//}
-
-		//if (gamepad1.b) {
-		//	clawPosition -= clawDelta;
-		//}
-
-        // clip the position values so that they never exceed their allowed range.
-        //armPosition = Range.clip(armPosition, ARM_MIN_RANGE, ARM_MAX_RANGE);
-        //clawPosition = Range.clip(clawPosition, CLAW_MIN_RANGE, CLAW_MAX_RANGE);
-
-		// write position values to the wrist and claw servo
-		//arm.setPosition(armPosition);
-		//claw.setPosition(clawPosition);
-
-
 
 		/*
 		 * Send telemetry data back to driver station. Note that if we are using
