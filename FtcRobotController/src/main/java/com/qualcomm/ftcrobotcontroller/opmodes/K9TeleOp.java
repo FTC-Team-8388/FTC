@@ -157,6 +157,7 @@ public class K9TeleOp extends Robot {
 		GamepadTask task2 = new GamepadTask(this, GamepadTask.GamepadNumber.GAMEPAD2);
 		addTask(task2);
 
+
 		// assign the starting position of the wrist and claw
 		//armPosition = 0.2;
 		//clawPosition = 0.2;
