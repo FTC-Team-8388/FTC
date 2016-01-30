@@ -75,46 +75,59 @@ public class AutoRed_AutoRed extends LinearOpMode {
         //Revers Direction on left motor
         motorLeft.setDirection(DcMotor.Direction.REVERSE);
 
-        sleep(2000);
+// motor power =-1 is full forward
+        // motor power = 1 is full reverse
+
+        // go forward
+        motorRight.setPower(-1);
+        motorLeft.setPower(-1);
+        sleep(1100);  //forward for second
+        motorRight.setPower(0);
+        motorLeft.setPower(0);
+        sleep(750);
+
+        // turn right 45 degrees
+        motorRight.setPower(-1);
+        motorLeft.setPower(1);
+        sleep(350);
+        motorRight.setPower(0);
+        motorLeft.setPower(0);
+        sleep(750);
+
+        // go forward
+        motorRight.setPower(-1);
+        motorLeft.setPower(-1);
+        sleep(1200);  //forward for second
+        motorRight.setPower(0);
+        motorLeft.setPower(0);
+        sleep(1000);
+
+        // turn right 45 degrees
+        motorRight.setPower(-0.5);
+        motorLeft.setPower(0.5);
+        sleep(300);
+        motorRight.setPower(0);
+        motorLeft.setPower(0);
+        sleep(200);
+
+        // go forward
+        motorRight.setPower(-1);
+        motorLeft.setPower(-1);
+        sleep(825);  //forward for second
+        motorRight.setPower(0);
+        motorLeft.setPower(0);
+        sleep(1000);
+        // turn right x degrees
+        motorRight.setPower(-0.5);
+        motorLeft.setPower(0.5);
+        sleep(250);
+        motorRight.setPower(0);
+        motorLeft.setPower(0);
+        sleep(200);
 
         // drop people
         while (armPower > 0.35) {
-            armPower -= servoDelta;
-            if (armPower <= 0.35)
-                armPower = 0.35;
-            //armPower = 0.35;		//launched position
-            peopleArm.setPosition(armPower);
-            sleep(20);  // delay 25 ms to slow rate
-        }
-
-        sleep(2000); // wait 2 seconds
-        // move people arm back to start
-        while(armPower< 0.96) {
-            armPower += servoDelta;
-            if (armPower >= 0.96)
-                armPower = 0.96;
-            //armPower = 0.95;  // retracted position
-            peopleArm.setPosition(armPower);
-            sleep(20);
-        }
-
-        sleep(2000); // wait 2 seconds
-
-        lowerLeftArm.setPosition(.25);
-        upperLeftArm.setPosition(0.2);
-        lowerRightArm.setPosition(0.7);
-        upperRightArm.setPosition(0.75);
-        sleep(2000); // wait 2 seconds
-
-        upperLeftArm.setPosition(0.97);		// retracted
-        upperRightArm.setPosition(0.0);   // retracted
-        lowerLeftArm.setPosition(0.0);
-        lowerRightArm.setPosition(0.97);
-        sleep(2000);
-
-        // drop people
-        while (armPower > 0.35) {
-            armPower -= servoDelta;
+            armPower -= servoDelta*2;
             if (armPower <= 0.35)
                 armPower = 0.35;
             //armPower = 0.35;		//launched position
